@@ -1,0 +1,333 @@
+{
+  "image": "ARTIFACT_REGISTRY_LOCATION/bq-to-jdbc:latest",
+  "metadata": {
+    "name": "BigQuery to JDBC",
+    "description": "The JDBC to BigQuery template is a batch pipeline that copies data from a relational database table into an existing BigQuery table. This pipeline uses JDBC to connect to the relational database. You can use this template to copy data from any relational database with available JDBC drivers into BigQuery.\n\nFor an extra layer of protection, you can also pass in a Cloud KMS key along with a Base64-encoded username, password, and connection string parameters encrypted with the Cloud KMS key. See the \u003ca href\u003d\"https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys/encrypt\"\u003eCloud KMS API encryption endpoint\u003c/a\u003e for additional details on encrypting your username, password, and connection string parameters.",
+    "parameters": [
+      {
+        "name": "driverJars",
+        "label": "Comma-separated Cloud Storage path(s) of the JDBC driver(s)",
+        "helpText": "The comma-separated list of driver JAR files. (Example: gs://your-bucket/driver_jar1.jar,gs://your-bucket/driver_jar2.jar)",
+        "regexes": [
+          "^.+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "driverClassName",
+        "label": "JDBC driver class name",
+        "helpText": "The JDBC driver class name. (Example: com.mysql.jdbc.Driver)",
+        "regexes": [
+          "^.+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "connectionURL",
+        "groupName": "Source",
+        "label": "JDBC connection URL string.",
+        "helpText": "The JDBC connection URL string. For example, `jdbc:mysql://some-host:3306/sampledb`. You can pass in this value as a string that\u0027s encrypted with a Cloud KMS key and then Base64-encoded. Remove whitespace characters from the Base64-encoded string. Note the difference between an Oracle non-RAC database connection string (`jdbc:oracle:thin:@some-host:\u003cport\u003e:\u003csid\u003e`) and an Oracle RAC database connection string (`jdbc:oracle:thin:@//some-host[:\u003cport\u003e]/\u003cservice_name\u003e`). (Example: jdbc:mysql://some-host:3306/sampledb)",
+        "regexes": [
+          "(^jdbc:[a-zA-Z0-9/:@.?_+!*\u003d\u0026-;]+$)|(^([A-Za-z0-9+/]{4}){1,}([A-Za-z0-9+/]{0,3})\u003d{0,3})"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "connectionProperties",
+        "label": "JDBC connection property string.",
+        "helpText": "The properties string to use for the JDBC connection. The format of the string must be `[propertyName\u003dproperty;]*`.For more information, see Configuration Properties (https://dev.mysql.com/doc/connector-j/8.1/en/connector-j-reference-configuration-properties.html) in the MySQL documentation. (Example: unicode\u003dtrue;characterEncoding\u003dUTF-8)",
+        "isOptional": true,
+        "regexes": [
+          "^[a-zA-Z0-9_;!*\u0026\u003d@#-:\\/]+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "username",
+        "label": "JDBC connection username.",
+        "helpText": "The username to use for the JDBC connection. You can pass in this value as a string that\u0027s encrypted with a Cloud KMS key and then Base64-encoded. Remove whitespace characters from the Base64-encoded string.",
+        "isOptional": true,
+        "regexes": [
+          "^.+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "password",
+        "label": "JDBC connection password.",
+        "helpText": "The password to use for the JDBC connection. You can pass in this value as a string that\u0027s encrypted with a Cloud KMS key and then Base64-encoded. Remove whitespace characters from the Base64-encoded string.",
+        "isOptional": true,
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "query",
+        "label": "JDBC source SQL query",
+        "helpText": "The query to run on the source to extract the data. Note that some JDBC SQL and BigQuery types, although sharing the same name, have some differences. Some important SQL -\u003e BigQuery type mappings to keep in mind are:\nDATETIME --\u003e TIMESTAMP\n\nType casting may be required if your schemas do not match. (Example: select * from sampledb.sample_table)",
+        "isOptional": true,
+        "regexes": [
+          "^.+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "outputTable",
+        "groupName": "Target",
+        "label": "BigQuery output table",
+        "helpText": "The BigQuery output table location. (Example: \u003cPROJECT_ID\u003e:\u003cDATASET_NAME\u003e.\u003cTABLE_NAME\u003e)",
+        "regexes": [
+          ".+[\\.:].+\\..+"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "BIGQUERY_TABLE"
+      },
+      {
+        "name": "bigQueryLoadingTemporaryDirectory",
+        "label": "Temporary directory for BigQuery loading process",
+        "helpText": "The temporary directory for the BigQuery loading process. (Example: gs://your-bucket/your-files/temp_dir)",
+        "regexes": [
+          "^gs:\\/\\/[^\\n\\r]+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "GCS_WRITE_FOLDER"
+      },
+      {
+        "name": "KMSEncryptionKey",
+        "label": "Google Cloud KMS key",
+        "helpText": "The Cloud KMS encryption key to use to decrypt the username, password, and connection string. If you  pass in a Cloud KMS key, you must also encrypt the username, password, and connection string. (Example: projects/your-project/locations/global/keyRings/your-keyring/cryptoKeys/your-key)",
+        "isOptional": true,
+        "regexes": [
+          "^projects\\/[^\\n\\r\\/]+\\/locations\\/[^\\n\\r\\/]+\\/keyRings\\/[^\\n\\r\\/]+\\/cryptoKeys\\/[^\\n\\r\\/]+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "useColumnAlias",
+        "label": "Whether to use column alias to map the rows.",
+        "helpText": "If set to `true`, the pipeline uses the column alias (`AS`) instead of the column name to map the rows to BigQuery. Defaults to `false`.",
+        "isOptional": true,
+        "regexes": [
+          "^(true|false)$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "BOOLEAN",
+        "defaultValue": "false"
+      },
+      {
+        "name": "isTruncate",
+        "label": "Whether to truncate data before writing",
+        "helpText": "If set to `true`, the pipeline truncates before loading data into BigQuery. Defaults to `false`, which causes the pipeline to append data.",
+        "isOptional": true,
+        "regexes": [
+          "^(true|false)$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "BOOLEAN",
+        "defaultValue": "false"
+      },
+      {
+        "name": "partitionColumn",
+        "label": "The name of a column of numeric type that will be used for partitioning.",
+        "helpText": "If this parameter is provided with the name of the `table` defined as an optional parameter, JdbcIO reads the table in parallel by executing multiple instances of the query on the same table (subquery) using ranges. Currently, only supports `Long` partition columns.",
+        "isOptional": true,
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "table",
+        "label": "Name of the table in the external database.",
+        "helpText": "The table to read from when using partitions. This parameter also accepts a subquery in parentheses. (Example: (select id, name from Person) as subq)",
+        "isOptional": true,
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "numPartitions",
+        "label": "The number of partitions.",
+        "helpText": "The number of partitions. With the lower and upper bound, this value forms partition strides for generated `WHERE` clause expressions that are used to split the partition column evenly. When the input is less than `1`, the number is set to `1`.",
+        "isOptional": true,
+        "regexes": [
+          "^[0-9]+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "NUMBER"
+      },
+      {
+        "name": "lowerBound",
+        "label": "Lower bound of partition column.",
+        "helpText": "The lower bound to use in the partition scheme. If not provided, this value is automatically inferred by Apache Beam for the supported types.",
+        "isOptional": true,
+        "regexes": [
+          "^[0-9]+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "NUMBER"
+      },
+      {
+        "name": "upperBound",
+        "label": "Upper bound of partition column",
+        "helpText": "The upper bound to use in the partition scheme. If not provided, this value is automatically inferred by Apache Beam for the supported types.",
+        "isOptional": true,
+        "regexes": [
+          "^[0-9]+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "NUMBER"
+      },
+      {
+        "name": "fetchSize",
+        "label": "Fetch Size",
+        "helpText": "The number of rows to be fetched from database at a time. Not used for partitioned reads. Defaults to: 50000.",
+        "isOptional": true,
+        "regexes": [
+          "^[0-9]+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "NUMBER",
+        "defaultValue": "50000"
+      },
+      {
+        "name": "createDisposition",
+        "label": "Create Disposition to use for BigQuery",
+        "helpText": "The BigQuery CreateDisposition to use. For example, `CREATE_IF_NEEDED` or `CREATE_NEVER`. Defaults to: CREATE_NEVER.",
+        "isOptional": true,
+        "regexes": [
+          "^(CREATE_IF_NEEDED|CREATE_NEVER)$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "enumOptions": [
+          {
+            "value": "CREATE_IF_NEEDED"
+          },
+          {
+            "value": "CREATE_NEVER"
+          }
+        ],
+        "paramType": "ENUM",
+        "defaultValue": "CREATE_NEVER"
+      },
+      {
+        "name": "bigQuerySchemaPath",
+        "label": "Cloud Storage path to BigQuery JSON schema",
+        "helpText": "The Cloud Storage path for the BigQuery JSON schema. If `createDisposition` is set to CREATE_IF_NEEDED, this parameter must be specified. (Example: gs://your-bucket/your-schema.json)",
+        "isOptional": true,
+        "regexes": [
+          "^gs:\\/\\/[^\\n\\r]+$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "GCS_READ_FILE"
+      },
+      {
+        "name": "disabledAlgorithms",
+        "label": "Disabled algorithms to override jdk.tls.disabledAlgorithms",
+        "helpText": "Comma separated algorithms to disable. If this value is set to none, no algorithm is disabled. Use this parameter with caution, because the algorithms disabled by default might have vulnerabilities or performance issues. (Example: SSLv3, RC4)",
+        "isOptional": true,
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "extraFilesToStage",
+        "label": "Extra files to stage in the workers",
+        "helpText": "Comma separated Cloud Storage paths or Secret Manager secrets for files to stage in the worker. These files are saved in the /extra_files directory in each worker. (Example: gs://\u003cBUCKET\u003e/file.txt,projects/\u003cPROJECT_ID\u003e/secrets/\u003cSECRET_ID\u003e/versions/\u003cVERSION_ID\u003e)",
+        "isOptional": true,
+        "regexes": [
+          "^((gs:\\/\\/[^\\n\\r,]+|projects\\/[^\\n\\r\\/]+\\/secrets\\/[^\\n\\r\\/]+\\/versions\\/[^\\n\\r\\/]+),)*(gs:\\/\\/[^\\n\\r,]+|projects\\/[^\\n\\r\\/]+\\/secrets\\/[^\\n\\r\\/]+\\/versions\\/[^\\n\\r\\/]+)$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "TEXT"
+      },
+      {
+        "name": "useStorageWriteApi",
+        "label": "Use BigQuery Storage Write API",
+        "helpText": "If `true`, the pipeline uses the BigQuery Storage Write API (https://cloud.google.com/bigquery/docs/write-api). The default value is `false`. For more information, see Using the Storage Write API (https://beam.apache.org/documentation/io/built-in/google-bigquery/#storage-write-api).",
+        "isOptional": true,
+        "regexes": [
+          "^(true|false)$"
+        ],
+        "parentTriggerValues": [
+          ""
+        ],
+        "paramType": "BOOLEAN",
+        "defaultValue": "false"
+      },
+      {
+        "name": "useStorageWriteApiAtLeastOnce",
+        "parentName": "useStorageWriteApi",
+        "label": "Use at at-least-once semantics in BigQuery Storage Write API",
+        "helpText": "When using the Storage Write API, specifies the write semantics. To use at-least-once semantics (https://beam.apache.org/documentation/io/built-in/google-bigquery/#at-least-once-semantics), set this parameter to `true`. To use exactly-once semantics, set the parameter to `false`. This parameter applies only when `useStorageWriteApi` is `true`. The default value is `false`.",
+        "isOptional": true,
+        "regexes": [
+          "^(true|false)$"
+        ],
+        "parentTriggerValues": [
+          "true"
+        ],
+        "paramType": "BOOLEAN",
+        "defaultValue": "false"
+      }
+    ],
+    "streaming": false,
+    "supportsAtLeastOnce": false,
+    "supportsExactlyOnce": true,
+    "defaultStreamingMode": "UNSPECIFIED"
+  },
+  "sdkInfo": {
+    "language": "JAVA"
+  },
+  "defaultEnvironment": {
+    "additionalUserLabels": {
+      "goog-dataflow-provided-template-name": "bq_to_jdbc_flex"
+    }
+  }
+}

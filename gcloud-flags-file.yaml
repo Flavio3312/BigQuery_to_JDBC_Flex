@@ -1,0 +1,22 @@
+--project: YOUR_PROJECT_ID
+--region: YOUR_REGION
+--max-workers: 2
+--template-file-gcs-location: gs://YOUR_BUCKET_NAME/images/bq-to-jdbc-image-spec.json
+--service-account-email: YOUR_SERVICE_ACCOUNT_EMAIL
+--disable-public-ips: true
+--worker-machine-type: c2-standard-4
+--subnetwork: https://www.googleapis.com/compute/v1/projects/YOUR_PROJECT_ID/regions/YOUR_REGION/subnetworks/YOUR_SUBNETWORK_NAME
+--parameters:
+  driverClassName: oracle.jdbc.driver.OracleDriver
+  driverJars: gs://YOUR_BUCKET_NAME/jars/ojdbc8.jar,gs://YOUR_BUCKET_NAME/jars/ucp.jar,gs://YOUR_BUCKET_NAME/jars/oraclepki.jar,gs://YOUR_BUCKET_NAME/jars/osdt_cert.jar,gs://YOUR_BUCKET_NAME/jars/osdt_core.jar
+  connectionURL: jdbc:oracle:thin:@YOUR_TNS_ALIAS?TNS_ADMIN=/extra_files
+  tempLocation: gs://YOUR_BUCKET_NAME/tmp
+  outputTable: YOUR_PROJECT_ID:YOUR_DATASET_NAME.YOUR_TABLE_NAME
+  query: SELECT * FROM YOUR_PROJECT_ID.YOUR_DATASET_NAME.YOUR_TABLE_NAME
+  table: YOUR_TABLE_NAME
+  bigQueryLoadingTemporaryDirectory: gs://YOUR_BUCKET_NAME/tmp/
+  connectionProperties: "isTruncate"
+  extraFilesToStage: gs://YOUR_BUCKET_NAME/extra_files/tnsnames.ora,gs://YOUR_BUCKET_NAME/extra_files/cwallet.sso,gs://YOUR_BUCKET_NAME/extra_files/ewallet.p12,gs://YOUR_BUCKET_NAME/extra_files/truststore.jks,gs://YOUR_BUCKET_NAME/extra_files/keystore.jks,gs://YOUR_BUCKET_NAME/extra_files/ojdbc.properties
+  username: YOUR_USERNAME
+  password: YOUR_PASSWORD
+
